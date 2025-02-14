@@ -116,8 +116,18 @@ public class FastGenericDatumReader<T> implements DatumReader<T> {
             */
           cachedFastDeserializer.compareAndSet(null,
               getRegularAvroImplWhenGenerationFail(writerSchema, readerSchema, modelData, customization));
-          LOGGER.warn("FastGenericDeserializer generation fails, and will cache cold deserializer "
-              + "for reader schema: [" + readerSchema + "], writer schema: [" + writerSchema + "]");
+
+          LOGGER.warn("FastGenericDeserializer generation fails, and will cache cold deserializer for "
+              + "reader schema: [" + Utils.getTruncateSchemaForWarning(readerSchema) + "],"
+              + "writer schema: [" + Utils.getTruncateSchemaForWarning(writerSchema) + "].");
+
+          if (LOGGER.isDebugEnabled() &&
+              (readerSchema.toString().length() > Utils.MAX_SCHEMA_LENGTH_IN_WARNING ||
+               writerSchema.toString().length() > Utils.MAX_SCHEMA_LENGTH_IN_WARNING)) {
+            LOGGER.debug("FastGenericDeserializer generation fails, and will cache cold deserializer for "
+                + "reader schema: [" + readerSchema + "],"
+                + "writer schema: [" + writerSchema + "].");
+          }
         }
         fastDeserializer = cachedFastDeserializer.get();
       } else {
