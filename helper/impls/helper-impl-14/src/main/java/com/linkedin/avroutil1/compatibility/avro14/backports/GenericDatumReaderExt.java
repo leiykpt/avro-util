@@ -14,6 +14,10 @@ import org.apache.avro.io.Decoder;
 
 import java.io.IOException;
 
+/**
+ * @deprecated DO NOT USE. This class was added to support long to int type demotion and is no longer needed.
+ */
+@Deprecated
 public class GenericDatumReaderExt<T> extends GenericDatumReader<T> {
 
     private Schema writer;

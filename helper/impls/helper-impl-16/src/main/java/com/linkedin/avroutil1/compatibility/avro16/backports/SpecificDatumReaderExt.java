@@ -21,7 +21,9 @@ import java.io.IOException;
  * this class allows constructing a {@link SpecificDatumReader} with
  * a specified {@link SpecificData} instance under avro 1.6
  * @param <T>
+ * @deprecated DO NOT USE. This class was added to support long to int type demotion and is no longer needed.
  */
+@Deprecated
 public class SpecificDatumReaderExt<T> extends SpecificDatumReader<T> {
 
     public SpecificDatumReaderExt(Schema writer, Schema reader, SpecificData specificData) {

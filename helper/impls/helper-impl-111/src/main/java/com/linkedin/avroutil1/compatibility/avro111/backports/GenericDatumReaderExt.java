@@ -24,7 +24,9 @@ import java.io.IOException;
  * a specified {@link GenericData} instance under avro 1.10
  *
  * @param <T>
+ * @deprecated DO NOT USE. This class was added to support long to int type demotion and is no longer needed.
  */
+@Deprecated
 public class GenericDatumReaderExt<T> extends GenericDatumReader<T> {
 
     public GenericDatumReaderExt(Schema writer, Schema reader, GenericData genericData) {

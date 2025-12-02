@@ -184,11 +184,7 @@ public class ResolvingGrammarGenerator extends ValidatingGrammarGenerator {
         break;
       case NULL:
       case BOOLEAN:
-        break;
       case INT:
-        if (writerType == Schema.Type.LONG) {
-          return Symbol.IntLongAdjustAction.INSTANCE;
-        }
       case ENUM:
       case ARRAY:
       case MAP:
@@ -520,11 +516,6 @@ public class ResolvingGrammarGenerator extends ValidatingGrammarGenerator {
           }
           break;
         case LONG:
-          // We can selectively demote long and check that it fits inside int range
-          // when reading an int from a long writer schema.
-          if (b.getType() == Schema.Type.INT) {
-            return j;
-          }
         case FLOAT:
           switch (b.getType()) {
           case DOUBLE:

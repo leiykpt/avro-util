@@ -82,11 +82,6 @@ public class ResolvingGrammarGenerator extends ValidatingGrammarGenerator {
       return simpleGen(action.writer, seen, useFqcns);
 
     } else if (action instanceof Resolver.ErrorAction) {
-      // We should be able to selectively demote long to int if it fits within the range of int.
-      if (isLongToIntDemotion((Resolver.ErrorAction) action, false)) {
-        return Symbol.IntLongAdjustAction.INSTANCE;
-      }
-
       return Symbol.error(action.toString());
 
     } else if (action instanceof Resolver.Skip) {
@@ -97,16 +92,6 @@ public class ResolvingGrammarGenerator extends ValidatingGrammarGenerator {
 
     } else if (action instanceof Resolver.ReaderUnion) {
       Resolver.ReaderUnion ru = (Resolver.ReaderUnion) action;
-
-      // Check if we need to handle selective long-to-int demotion within unions.
-      if (ru.actualAction instanceof Resolver.ErrorAction) {
-        if (isLongToIntDemotion((Resolver.ErrorAction) ru.actualAction, true)) {
-          return Symbol.seq(
-                  Symbol.unionAdjustAction(ru.firstMatch, Symbol.IntLongAdjustAction.INSTANCE),
-                  Symbol.UNION);
-        }
-      }
-
       Symbol s = generate(ru.actualAction, seen, useFqcns);
       return Symbol.seq(Symbol.unionAdjustAction(ru.firstMatch, s), Symbol.UNION);
 
@@ -122,28 +107,18 @@ public class ResolvingGrammarGenerator extends ValidatingGrammarGenerator {
       if (((Resolver.WriterUnion) action).unionEquiv) {
         return simpleGen(action.writer, seen, useFqcns);
       }
-
-      Resolver.WriterUnion wu = (Resolver.WriterUnion) action;
-      Resolver.Action[] branches = wu.actions;
+      Resolver.Action[] branches = ((Resolver.WriterUnion) action).actions;
       Symbol[] symbols = new Symbol[branches.length];
       String[] oldLabels = new String[branches.length];
       String[] newLabels = new String[branches.length];
-
-      for (int i = 0; i < branches.length; i++) {
-        // Check if this branch needs long-to-int conversion
-        if (branches[i] instanceof Resolver.ErrorAction && isLongToIntDemotion((Resolver.ErrorAction) branches[i], true)) {
-          symbols[i] = Symbol.seq(
-                  Symbol.unionAdjustAction(i, Symbol.IntLongAdjustAction.INSTANCE),
-                  Symbol.UNION);
-        } else {
-          symbols[i] = generate(branches[i], seen, useFqcns);
-        }
-
+      int i = 0;
+      for (Resolver.Action branch : branches) {
+        symbols[i] = generate(branch, seen, useFqcns);
         Schema schema = action.writer.getTypes().get(i);
         oldLabels[i] = schema.getName();
         newLabels[i] = schema.getFullName();
+        i++;
       }
-
       return Symbol.seq(Symbol.alt(symbols, oldLabels, newLabels, useFqcns), Symbol.WRITER_UNION_ACTION);
     } else if (action instanceof Resolver.EnumAdjust) {
       Resolver.EnumAdjust e = (Resolver.EnumAdjust) action;
@@ -375,39 +350,6 @@ public class ResolvingGrammarGenerator extends ValidatingGrammarGenerator {
         e.writeNull();
         break;
     }
-  }
-
-  private static boolean isLongToIntDemotion(Resolver.ErrorAction errorAction, boolean includeIntUnions) {
-    return isInt(errorAction.reader, includeIntUnions)
-            && errorAction.writer.getType() == Schema.Type.LONG
-            && isLongToIntDemotionError(errorAction, includeIntUnions);
-  }
-
-  private static boolean isLongToIntDemotionError(Resolver.ErrorAction errorAction, boolean includeIntUnions) {
-    if (errorAction.error == Resolver.ErrorAction.ErrorType.INCOMPATIBLE_SCHEMA_TYPES) {
-      return true;
-    }
-
-    return includeIntUnions && errorAction.error == Resolver.ErrorAction.ErrorType.NO_MATCHING_BRANCH;
-  }
-
-  private static boolean isInt(Schema schema, boolean includeIntUnions) {
-    if (schema.getType() == Schema.Type.INT) {
-      return true;
-    }
-
-    if (!includeIntUnions) {
-      return false;
-    }
-
-    if (schema.getType() != Schema.Type.UNION) {
-      return false;
-    }
-
-    List<Schema> types = schema.getTypes();
-    return (types.size() == 2
-            && types.get(0).getType() == Schema.Type.NULL
-            && types.get(1).getType() == Schema.Type.INT);
   }
 
   /**

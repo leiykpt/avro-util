@@ -421,10 +421,6 @@ public abstract class Symbol {
     }
   }
 
-  public static class IntLongAdjustAction extends ImplicitAction {
-    public static final IntLongAdjustAction INSTANCE = new IntLongAdjustAction();
-  }
-
   public static class IntCheckAction extends Symbol {
     public final int size;
     public IntCheckAction(int size) {

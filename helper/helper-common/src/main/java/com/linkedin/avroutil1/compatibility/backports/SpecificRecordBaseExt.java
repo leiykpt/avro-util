@@ -13,7 +13,9 @@ import java.io.IOException;
 
 /**
  * Extension of {@link SpecificRecordBase} that allows for custom decoding using a custom decoder.
+ * @deprecated DO NOT USE. This class was added to support long to int type demotion and is no longer needed.
  */
+@Deprecated
 public abstract class SpecificRecordBaseExt extends SpecificRecordBase {
 
     /**

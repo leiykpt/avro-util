@@ -17,7 +17,9 @@ import java.nio.ByteBuffer;
 /**
  * Interface that enables custom decoding of
  * {@link com.linkedin.avroutil1.compatibility.backports.SpecificRecordBaseExt} instances.
+ * @deprecated DO NOT USE. This class was added to support long to int type demotion and is no longer needed.
  */
+@Deprecated
 public interface CustomDecoder {
 
     /** Returns the actual order in which the reader's fields will be

@@ -24,7 +24,6 @@
 
 package com.linkedin.avroutil1.compatibility.avro15.codec;
 
-import com.linkedin.avroutil1.compatibility.CustomDecoder;
 import com.linkedin.avroutil1.compatibility.avro15.parsing.ResolvingGrammarGenerator;
 import com.linkedin.avroutil1.compatibility.avro15.parsing.Symbol;
 import java.io.IOException;
@@ -46,7 +45,7 @@ import org.apache.avro.io.DecoderFactory;
  * <p>See the <a href="doc-files/parsing.html">parser documentation</a> for
  *  information on how this works.
  */
-public class ResolvingDecoder extends ValidatingDecoder implements CustomDecoder {
+public class ResolvingDecoder extends ValidatingDecoder {
 
   private Decoder backup;
 
@@ -158,23 +157,6 @@ public class ResolvingDecoder extends ValidatingDecoder implements CustomDecoder
   }
 
   @Override
-  public int readInt() throws IOException {
-    Symbol actual = parser.advance(Symbol.INT);
-    if (actual == Symbol.INT) {
-      return in.readInt();
-    } else if (actual == Symbol.IntLongAdjustAction.INSTANCE) {
-      long value = in.readLong();
-      if (value < Integer.MIN_VALUE || value > Integer.MAX_VALUE) {
-        throw new AvroTypeException(value + " cannot be represented as int");
-      }
-
-      return (int) value;
-    }
-
-    throw new AvroTypeException("Expected int but found " + actual);
-  }
-
-  @Override
   public long readLong() throws IOException {
     Symbol actual = parser.advance(Symbol.LONG);
     if (actual == Symbol.INT) {
@@ -263,8 +245,6 @@ public class ResolvingDecoder extends ValidatingDecoder implements CustomDecoder
         .binaryDecoder(dsa.contents, null);
     } else if (top == Symbol.DEFAULT_END_ACTION) {
       in = backup;
-    } else if (top == Symbol.IntLongAdjustAction.INSTANCE) {
-      return top;
     } else {
       throw new AvroTypeException("Unknown action: " + top);
     }

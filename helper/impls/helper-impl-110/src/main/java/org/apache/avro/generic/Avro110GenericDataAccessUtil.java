@@ -10,7 +10,9 @@ import org.apache.avro.Schema;
 
 /**
  * this class exists to allow us access to package-private classes and methods on class {@link GenericData}
+ * @deprecated DO NOT USE. This class was added to support long to int type demotion and is no longer needed.
  */
+@Deprecated
 public class Avro110GenericDataAccessUtil {
     private Avro110GenericDataAccessUtil() {
     }
